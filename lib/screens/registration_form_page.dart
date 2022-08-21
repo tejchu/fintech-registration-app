@@ -1,12 +1,9 @@
-import 'dart:ui';
-
-import 'package:fintech_registration_app/components/customizable_dropdown_menu.dart';
 import 'package:fintech_registration_app/components/customizable_text_field.dart';
-import 'package:fintech_registration_app/models/majors.dart';
-import 'package:fintech_registration_app/models/projects.dart';
 import 'package:fintech_registration_app/screens/landing_page.dart';
 import 'package:flutter/material.dart';
-
+import '../components/customizable_dropdown_menu.dart';
+import '../models/majors.dart';
+import '../models/projects.dart';
 import '../models/years.dart';
 import '../services/download_service.dart';
 
@@ -23,6 +20,8 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
   TextEditingController email = TextEditingController();
   final Major = GlobalKey();
   bool? myValue = false;
+  final GlobalKey<FormState> _formFieldKey = GlobalKey<FormState>();
+  ValueKey<bool> checkKey = ValueKey(false);
 
   @override
   Widget build(BuildContext context) {
@@ -44,20 +43,36 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                 width: 200,
               ),
               Form(
+                key: _formFieldKey,
                 child: Column(
                   children: [
                     CustomizableTextField(
-                      key: const Key('FirstName'),
                       labelText: 'First Name',
                       controller: firstName,
+                      onEditingComplete: () {
+                        //formFieldKey.currentState!.validate();
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "This field is required";
+                        }
+                        return null;
+                      },
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
                     CustomizableTextField(
-                      key: const Key('LastName'),
                       labelText: 'Last Name',
                       controller: lastName,
-                    ),
-                    const SizedBox(
-                      height: 10,
+                      onEditingComplete: () {
+                        //formFieldKey.currentState!.validate();
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "This field is required";
+                        }
+                        return null;
+                      },
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
                     CustomizableDropdownButton(
                       list: majors,
@@ -76,9 +91,21 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                       initialValue: 'Project',
                     ),
                     CustomizableTextField(
-                      key: const Key('Email'),
                       labelText: 'Your Jacobs Email',
                       controller: email,
+                      onEditingComplete: () {
+                       // formFieldKey.currentState!.validate();
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "This field is required";
+                        } else if (!value.endsWith('@jacobs-university.de')) {
+                          return "Please enter a valid Jacobs University email address";
+                        } else {
+                          return null;
+                        }
+                      },
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -117,8 +144,10 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                       ],
                     ),
                     CheckboxListTile(
-                      title: Text('accept terms and conitions'),
+                      title: Text('accept terms and conitions',style: TextStyle(color: (myValue!)?myColor:Colors.redAccent),),
                       value: myValue,
+                      activeColor: myColor,
+                      tileColor: Colors.black12,
                       onChanged: (bool? value) {
                         setState(() {
                           myValue = value;
@@ -127,12 +156,16 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        print(firstName.text);
-                        print(lastName.text);
-                        print(email.text);
+                        if (_formFieldKey.currentState!.validate() && myValue!) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const LandingPage(),
+                            ),
+                          );
+                        }
                       },
                       child: Text('proceed'),
-                    )
+                    ),
                   ],
                 ),
               ),

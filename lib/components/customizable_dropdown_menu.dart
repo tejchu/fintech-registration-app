@@ -1,4 +1,3 @@
-import 'package:fintech_registration_app/models/majors.dart';
 import 'package:flutter/material.dart';
 
 class CustomizableDropdownButton extends StatefulWidget {
@@ -29,7 +28,15 @@ class _CustomizableDropdownButtonState
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButton(
+    return DropdownButtonFormField(
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      validator: (value) {
+        if (value == widget.initialValue || value == null ) {
+          return "This field is required";
+        } else {
+          return null;
+        }
+      },
       isExpanded: true,
       items: List.generate(
         widget.list.length,
@@ -38,12 +45,13 @@ class _CustomizableDropdownButtonState
           child: Text(widget.list[index]),
         ),
       ),
-      hint: Text((valueChanged) ? selectedMajor : widget.initialValue),
+      hint: (valueChanged) ? null : Text(widget.initialValue),
+      value: (valueChanged) ? selectedMajor : null,
       onChanged: (String? selection) {
         setState(() {
           valueChanged = true;
           selectedMajor = selection!;
-          print(selectedMajor);
+          // print(selectedMajor);
         });
       },
     );

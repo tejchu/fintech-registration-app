@@ -1,4 +1,3 @@
-import 'package:fintech_registration_app/screens/landing_page.dart';
 import 'package:fintech_registration_app/screens/registration_form_page.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +11,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Registration: FinTech',
       home: RegistrationFormPage(),
