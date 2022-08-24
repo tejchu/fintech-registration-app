@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>175829270253-2n9hjfb2o06u7jgo7vk1jbigsq134lfu.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.175829270253-2n9hjfb2o06u7jgo7vk1jbigsq134lfu</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAZ1Vi39P5LPEHTfk2FZXLzrU3DGChs7qg</string>
+	<key>GCM_SENDER_ID</key>
+	<string>175829270253</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.ibcm.fintechRegistrationApp</string>
+	<key>PROJECT_ID</key>
+	<string>fintech-registration-app</string>
+	<key>STORAGE_BUCKET</key>
+	<string>fintech-registration-app.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:175829270253:ios:d82a07e42284dc63df16e4</string>
+</dict>
+</plist>

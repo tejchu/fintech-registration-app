@@ -6,6 +6,7 @@ import 'package:fintech_registration_app/models/majors.dart';
 import 'package:fintech_registration_app/models/projects.dart';
 import 'package:fintech_registration_app/screens/landing_page.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/years.dart';
 import '../services/download_service.dart';
@@ -23,6 +24,19 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
   TextEditingController email = TextEditingController();
   final Major = GlobalKey();
   bool? myValue = false;
+  CollectionReference users = FirebaseFirestore.instance.collection('Users');
+
+  Future<void> addUser() {
+      // Call the user's CollectionReference to add a new user
+      return users 
+          .add({
+            'first_name': firstName.text, // John Doe
+            'last_name': lastName.text, // Stokes and Sons
+            'email': email.text // 42
+          })
+          .then((value) => print("User Added"))
+          .catchError((error) => print("Failed to add user: $error"));
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -127,6 +141,7 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                     ),
                     ElevatedButton(
                       onPressed: () {
+                        addUser();
                         print(firstName.text);
                         print(lastName.text);
                         print(email.text);
