@@ -1,7 +1,9 @@
 import 'package:fintech_registration_app/components/customizable_text_field.dart';
 import 'package:fintech_registration_app/screens/landing_page.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:universal_html/html.dart';
 import '../components/customizable_dropdown_menu.dart';
 import '../models/majors.dart';
 import '../models/projects.dart';
@@ -24,18 +26,64 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
   CollectionReference users = FirebaseFirestore.instance.collection('Users');
 
   Future<void> addUser() {
-      // Call the user's CollectionReference to add a new user
-      return users 
-          .add({
-            'first_name': firstName.text, // John Doe
-            'last_name': lastName.text, // Stokes and Sons
-            'email': email.text // 42
-          })
-          .then((value) => print("User Added"))
-          .catchError((error) => print("Failed to add user: $error"));
-    }
+    // Call the user's CollectionReference to add a new user
+    return users
+        .add({
+          'first_name': firstName.text, // John Doe
+          'last_name': lastName.text, // Stokes and Sons
+          'email': email.text // 42
+        })
+        .then((value) => print("User Added"))
+        .catchError((error) => print("Failed to add user: $error"));
+  }
+
   final GlobalKey<FormState> _formFieldKey = GlobalKey<FormState>();
   ValueKey<bool> checkKey = ValueKey(false);
+  File? pickedCV;
+  bool submittedCV = false;
+  File? pickedNDA;
+  bool submittedNDA = false;
+
+  void selectCV() {
+    FileUploadInputElement selectInput = FileUploadInputElement()
+      ..accept = 'pdf/*';
+    selectInput.click();
+
+    selectInput.onChange.listen((event) {
+      final file = selectInput.files!.first;
+      final reader = FileReader();
+      reader.readAsDataUrl(file);
+      setState(() {
+        pickedCV = file;
+        submittedCV = true;
+      });
+    });
+  }
+
+  void selectNDA() {
+    FileUploadInputElement selectInput = FileUploadInputElement()
+      ..accept = 'pdf/*';
+    selectInput.click();
+
+    selectInput.onChange.listen((event) {
+      final file = selectInput.files!.first;
+      final reader = FileReader();
+      reader.readAsDataUrl(file);
+      setState(() {
+        pickedNDA = file;
+        submittedNDA = true;
+      });
+    });
+  }
+
+  void uploadFile(pathName, selectedFile) {
+    final path = pathName;
+    print(selectedFile);
+    FirebaseStorage.instance
+        .refFromURL('gs://fintech-registration-app.appspot.com/')
+        .child(path)
+        .putBlob(selectedFile);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,9 +144,49 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                       list: years,
                       initialValue: 'Year Of Graduation',
                     ),
-                    ElevatedButton(
-                      onPressed: () {},
-                      child: Text('upload your cv here'),
+                    // SizedBox(height: 5),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: GestureDetector(
+                            onTap: selectCV,
+                            child: SizedBox(
+                              width: 200,
+                              height: 50,
+                              child: Card(
+                                color: myButtonColor,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: const [
+                                      Icon(Icons.upload),
+                                      Text('Upload your CV'),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Checkbox(
+                          activeColor: Colors.black,
+                          value: submittedCV,
+                          onChanged: (value) => false,
+                        ),
+                        CloseButton(
+                          color: Colors.black,
+                          onPressed: () {
+                            setState(() {
+                              submittedCV = false;
+                              pickedCV = null;
+                            });
+                          },
+                        ),
+                      ],
                     ),
                     CustomizableDropdownButton(
                       list: projects,
@@ -108,7 +196,7 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                       labelText: 'Your Jacobs Email',
                       controller: email,
                       onEditingComplete: () {
-                       // formFieldKey.currentState!.validate();
+                        // formFieldKey.currentState!.validate();
                       },
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -127,10 +215,37 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                         Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 20, horizontal: 20),
+                          child: MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            child: GestureDetector(
+                              onTap: () {
+                                downloadFile('assets/Blank_NDA.pdf');
+                              },
+                              child: SizedBox(
+                                width: 200,
+                                height: 50,
+                                child: Card(
+                                  color: myButtonColor,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: const [
+                                        Icon(Icons.download),
+                                        Text('Download NDA'),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        MouseRegion(
+                          cursor: SystemMouseCursors.click,
                           child: GestureDetector(
-                            onTap: () {
-                              downloadFile('assets/Blank_NDA.pdf');
-                            },
+                            onTap: selectNDA,
                             child: SizedBox(
                               width: 200,
                               height: 50,
@@ -142,8 +257,8 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceAround,
                                     children: const [
-                                      Icon(Icons.download),
-                                      Text('Download NDA'),
+                                      Icon(Icons.upload),
+                                      Text('Upload NDA'),
                                     ],
                                   ),
                                 ),
@@ -151,14 +266,28 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                             ),
                           ),
                         ),
-                        ElevatedButton(
-                          onPressed: () {},
-                          child: Text('Upload NDA'),
+                        Checkbox(
+                          activeColor: Colors.black,
+                          value: submittedNDA,
+                          onChanged: (value) => false,
+                        ),
+                        CloseButton(
+                          color: Colors.black,
+                          onPressed: () {
+                            setState(() {
+                              submittedNDA = false;
+                              pickedNDA = null;
+                            });
+                          },
                         ),
                       ],
                     ),
                     CheckboxListTile(
-                      title: Text('accept terms and conitions',style: TextStyle(color: (myValue!)?myColor:Colors.redAccent),),
+                      title: Text(
+                        'accept terms and conitions',
+                        style: TextStyle(
+                            color: (myValue!) ? myColor : Colors.redAccent),
+                      ),
                       value: myValue,
                       activeColor: myColor,
                       tileColor: Colors.black12,
@@ -170,11 +299,15 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        addUser();
-                        print(firstName.text);
-                        print(lastName.text);
-                        print(email.text);
-                        if (_formFieldKey.currentState!.validate() && myValue!) {
+                        if (_formFieldKey.currentState!.validate() &&
+                            myValue! &&
+                            submittedCV) {
+                          print("object");
+                          addUser();
+                          uploadFile('CVs/${firstName.text}${lastName.text}',
+                              pickedCV);
+                          uploadFile('NDAs/${firstName.text}${lastName.text}',
+                              pickedNDA);
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => const LandingPage(),
