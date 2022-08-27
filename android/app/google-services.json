@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "175829270253",
+    "project_id": "fintech-registration-app",
+    "storage_bucket": "fintech-registration-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:175829270253:android:e1060a1b65fb33bfdf16e4",
+        "android_client_info": {
+          "package_name": "com.ibcm.fintech_registration_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "175829270253-lqtfjbc9l1jrvgsro73b0764n8p1lop5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2zyXRIbSJczc4RT1UYn7djCmxgZjt5Jk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "175829270253-lqtfjbc9l1jrvgsro73b0764n8p1lop5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
