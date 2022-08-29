@@ -11,3 +11,10 @@ List<Text> majors1 = [
 const Text('Math'),
 const Text('Physics'),
 ];
+
+class SelectedMajor{
+  late final String name;
+  getName(){
+    return name;
+  }
+}
