@@ -1,4 +1,7 @@
+import 'package:fintech_registration_app/models/registrants.dart';
 import 'package:flutter/material.dart';
+
+import '../screens/registration_form_page.dart';
 
 class CustomizableDropdownButton extends StatefulWidget {
   final List<String> list;
@@ -31,7 +34,7 @@ class _CustomizableDropdownButtonState
     return DropdownButtonFormField(
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (value) {
-        if (value == widget.initialValue || value == null ) {
+        if (value == widget.initialValue || value == null) {
           return "This field is required";
         } else {
           return null;
@@ -51,6 +54,17 @@ class _CustomizableDropdownButtonState
         setState(() {
           valueChanged = true;
           selectedMajor = selection!;
+          switch (widget.initialValue) {
+            case 'Your major':
+              major = selection;
+              break;
+            case 'Year Of Graduation':
+              gradYear = selection;
+              break;
+            case 'Project':
+              project = selection;
+              break;
+          }
           // print(selectedMajor);
         });
       },

@@ -1,14 +1,20 @@
 import 'package:fintech_registration_app/components/customizable_text_field.dart';
-import 'package:fintech_registration_app/screens/landing_page.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:fintech_registration_app/models/project.dart';
+import 'package:fintech_registration_app/screens/successful_registration_page.dart';
+import 'package:fintech_registration_app/services/file_uploader_service.dart';
+import 'package:fintech_registration_app/services/firebase_service.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:universal_html/html.dart';
 import '../components/customizable_dropdown_menu.dart';
 import '../models/majors.dart';
-import '../models/projects.dart';
 import '../models/years.dart';
 import '../services/download_service.dart';
+
+//Todo create map with data to put in firebase
+
+String major = '';
+String gradYear = '';
+String project = '';
 
 class RegistrationFormPage extends StatefulWidget {
   const RegistrationFormPage({Key? key}) : super(key: key);
@@ -18,37 +24,26 @@ class RegistrationFormPage extends StatefulWidget {
 }
 
 class _RegistrationFormPageState extends State<RegistrationFormPage> {
+  final GlobalKey<FormState> _formFieldKey = GlobalKey<FormState>();
+
+  //text field value geters
   TextEditingController firstName = TextEditingController();
   TextEditingController lastName = TextEditingController();
   TextEditingController email = TextEditingController();
-  final Major = GlobalKey();
+
+  //logic variables for validation
   bool? myValue = false;
-  CollectionReference users = FirebaseFirestore.instance.collection('Users');
-
-  Future<void> addUser() {
-    // Call the user's CollectionReference to add a new user
-    return users
-        .add({
-          'first_name': firstName.text, // John Doe
-          'last_name': lastName.text, // Stokes and Sons
-          'email': email.text // 42
-        })
-        .then((value) => print("User Added"))
-        .catchError((error) => print("Failed to add user: $error"));
-  }
-
-  final GlobalKey<FormState> _formFieldKey = GlobalKey<FormState>();
-  ValueKey<bool> checkKey = ValueKey(false);
-  File? pickedCV;
   bool submittedCV = false;
-  File? pickedNDA;
   bool submittedNDA = false;
+  bool downloadedNDA = false;
+  File? pickedCV;
+  File? pickedNDA;
 
+  //select files
   void selectCV() {
     FileUploadInputElement selectInput = FileUploadInputElement()
       ..accept = 'pdf/*';
     selectInput.click();
-
     selectInput.onChange.listen((event) {
       final file = selectInput.files!.first;
       final reader = FileReader();
@@ -64,7 +59,6 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
     FileUploadInputElement selectInput = FileUploadInputElement()
       ..accept = 'pdf/*';
     selectInput.click();
-
     selectInput.onChange.listen((event) {
       final file = selectInput.files!.first;
       final reader = FileReader();
@@ -74,15 +68,6 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
         submittedNDA = true;
       });
     });
-  }
-
-  void uploadFile(pathName, selectedFile) {
-    final path = pathName;
-    print(selectedFile);
-    FirebaseStorage.instance
-        .refFromURL('gs://fintech-registration-app.appspot.com/')
-        .child(path)
-        .putBlob(selectedFile);
   }
 
   @override
@@ -111,30 +96,18 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                     CustomizableTextField(
                       labelText: 'First Name',
                       controller: firstName,
-                      onEditingComplete: () {
-                        //formFieldKey.currentState!.validate();
-                      },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "This field is required";
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      validator: (value) =>
+                      (value == null || value.isEmpty)
+                          ? "This field is required"
+                          : null,
                     ),
                     CustomizableTextField(
                       labelText: 'Last Name',
                       controller: lastName,
-                      onEditingComplete: () {
-                        //formFieldKey.currentState!.validate();
-                      },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "This field is required";
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      validator: (value) =>
+                      (value == null || value.isEmpty)
+                          ? "This field is required"
+                          : null,
                     ),
                     CustomizableDropdownButton(
                       list: majors,
@@ -144,7 +117,6 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                       list: years,
                       initialValue: 'Year Of Graduation',
                     ),
-                    // SizedBox(height: 5),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -161,10 +133,24 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                                   padding: const EdgeInsets.all(8.0),
                                   child: Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: const [
-                                      Icon(Icons.upload),
-                                      Text('Upload your CV'),
+                                    MainAxisAlignment.spaceAround,
+                                    children: [
+                                      (submittedCV)
+                                          ? Checkbox(
+                                        activeColor: Colors.transparent,
+                                        value: submittedCV,
+                                        onChanged: (value) => false,
+                                      )
+                                          : const Icon(Icons.upload),
+                                      Text(
+                                        (!submittedCV)
+                                            ? 'Upload your CV'
+                                            : 'CV uploaded',
+                                        style: TextStyle(
+                                            color: (submittedCV)
+                                                ? Colors.white
+                                                : Colors.black),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -172,20 +158,16 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                             ),
                           ),
                         ),
-                        Checkbox(
-                          activeColor: Colors.black,
-                          value: submittedCV,
-                          onChanged: (value) => false,
-                        ),
-                        CloseButton(
-                          color: Colors.black,
-                          onPressed: () {
-                            setState(() {
-                              submittedCV = false;
-                              pickedCV = null;
-                            });
-                          },
-                        ),
+                        (submittedCV)
+                            ? CloseButton(
+                          color: Colors.black54,
+                          onPressed: () =>
+                              setState(() {
+                                submittedCV = false;
+                                pickedCV = null;
+                              }),
+                        )
+                            : const SizedBox.shrink(),
                       ],
                     ),
                     CustomizableDropdownButton(
@@ -195,19 +177,13 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                     CustomizableTextField(
                       labelText: 'Your Jacobs Email',
                       controller: email,
-                      onEditingComplete: () {
-                        // formFieldKey.currentState!.validate();
-                      },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "This field is required";
-                        } else if (!value.endsWith('@jacobs-university.de')) {
-                          return "Please enter a valid Jacobs University email address";
-                        } else {
-                          return null;
-                        }
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      validator: (value) =>
+                      (value == null || value.isEmpty)
+                          ? "This field is required"
+                          : (!value.endsWith('@jacobs-university.de') &&
+                          value.length < 22)
+                          ? "Please enter a valid Jacobs University email address"
+                          : null,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -219,6 +195,9 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                             cursor: SystemMouseCursors.click,
                             child: GestureDetector(
                               onTap: () {
+                                setState(() {
+                                  downloadedNDA = true;
+                                });
                                 downloadFile('assets/Blank_NDA.pdf');
                               },
                               child: SizedBox(
@@ -230,10 +209,22 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                                     padding: const EdgeInsets.all(8.0),
                                     child: Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: const [
-                                        Icon(Icons.download),
-                                        Text('Download NDA'),
+                                      MainAxisAlignment.spaceAround,
+                                      children: [
+                                        (downloadedNDA)
+                                            ? Checkbox(
+                                          activeColor: Colors.transparent,
+                                          value: downloadedNDA,
+                                          onChanged: (value) => false,
+                                        )
+                                            : const Icon(Icons.download),
+                                        Text(
+                                          'Download NDA',
+                                          style: TextStyle(
+                                              color: (downloadedNDA)
+                                                  ? Colors.white
+                                                  : Colors.black),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -255,10 +246,24 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                                   padding: const EdgeInsets.all(8.0),
                                   child: Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: const [
-                                      Icon(Icons.upload),
-                                      Text('Upload NDA'),
+                                    MainAxisAlignment.spaceAround,
+                                    children: [
+                                      (submittedNDA)
+                                          ? Checkbox(
+                                        activeColor: Colors.transparent,
+                                        value: submittedNDA,
+                                        onChanged: (value) => false,
+                                      )
+                                          : const Icon(Icons.upload),
+                                      Text(
+                                        (!submittedNDA)
+                                            ? 'Upload NDA'
+                                            : 'NDA uploaded',
+                                        style: TextStyle(
+                                            color: (submittedNDA)
+                                                ? Colors.white
+                                                : Colors.black),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -266,20 +271,17 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                             ),
                           ),
                         ),
-                        Checkbox(
-                          activeColor: Colors.black,
-                          value: submittedNDA,
-                          onChanged: (value) => false,
-                        ),
-                        CloseButton(
-                          color: Colors.black,
+                        (submittedNDA)
+                            ? CloseButton(
+                          color: Colors.black54,
                           onPressed: () {
                             setState(() {
                               submittedNDA = false;
                               pickedNDA = null;
                             });
                           },
-                        ),
+                        )
+                            : const SizedBox.shrink(),
                       ],
                     ),
                     CheckboxListTile(
@@ -289,7 +291,7 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                             color: (myValue!) ? myColor : Colors.redAccent),
                       ),
                       value: myValue,
-                      activeColor: myColor,
+                      activeColor: Colors.transparent,
                       tileColor: Colors.black12,
                       onChanged: (bool? value) {
                         setState(() {
@@ -297,25 +299,54 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                         });
                       },
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_formFieldKey.currentState!.validate() &&
-                            myValue! &&
-                            submittedCV) {
-                          print("object");
-                          addUser();
-                          uploadFile('CVs/${firstName.text}${lastName.text}',
-                              pickedCV);
-                          uploadFile('NDAs/${firstName.text}${lastName.text}',
-                              pickedNDA);
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const LandingPage(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 20, horizontal: 20),
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
+                          onTap: () async {
+                            if (_formFieldKey.currentState!.validate() &&
+                                myValue! &&
+                                submittedCV) {
+                              //add major,project,gradYear to firebase
+                              FirebaseService().addUser({
+                                'first_name': firstName.text, // John Doe
+                                'last_name': lastName.text, // Stokes and Sons
+                                'email': email.text, // 42
+                              });
+                              FileUploaderService.uploadFile(
+                                  'CVs/${firstName.text}${lastName.text}',
+                                  pickedCV);
+                              FileUploaderService.uploadFile(
+                                  'NDAs/${firstName.text}${lastName.text}',
+                                  pickedNDA);
+
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                  const SuccessfulRegistrationPage(),
+                                ),
+                              );
+                            }
+                          },
+                          child: SizedBox(
+                            width: 200,
+                            height: 50,
+                            child: Card(
+                              color: myButtonColor,
+                              child: const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Center(child: Text('Submit')),
+                              ),
                             ),
-                          );
-                        }
-                      },
-                      child: Text('proceed'),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Text(
+                      '*Keep in mind that every person can only register once!',
+                      style: TextStyle(fontSize: 10),
                     ),
                   ],
                 ),
