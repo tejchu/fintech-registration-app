@@ -1,6 +1,6 @@
 # Fintech Registration App
 
-A responsive web app with registration form. 
+Fully responsive and functional web registration application. It stores the data inputed by each user into Fiebase Firestore and the PDf files into Firebase Storage. It is hosted with Firebase hosting.
 
 ### Technologies Used: 
 - Dependencies:
