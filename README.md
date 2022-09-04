@@ -16,7 +16,7 @@ A responsive web app with registration form.
   -   firebase_storage: ^10.3.6 (connection to firebase storage)
   -   firebase: ^9.0.3
   -   firebase_dart: ^1.0.11
--Back-end:
+- Back-end:
   -   Firebase Firestore (for storing the information provided by the users, such as name, email, etc.)
   -   Firebase Storage (for storing the PDF files provided by the users)
   -   Firebase Hosting
