@@ -180,7 +180,7 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                       validator: (value) =>
                       (value == null || value.isEmpty)
                           ? "This field is required"
-                          : (!value.endsWith('@jacobs-university.de' || '@constructor.university') &&
+                          : (!value.endsWith('@constructor.university') &&
                           value.length < 22)
                           ? "Please enter a valid Constructor University email address"
                           : null,
