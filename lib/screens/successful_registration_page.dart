@@ -21,7 +21,7 @@ class _SuccessfulRegistrationPageState
   @override
   Widget build(BuildContext context) {
     TextEditingController emailPrefix = TextEditingController();
-    String emailSuffix = '@jacobs_university.de';
+    String emailSuffix = '@constructor.university';
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(

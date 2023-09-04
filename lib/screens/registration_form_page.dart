@@ -175,14 +175,14 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                       initialValue: 'Project',
                     ),
                     CustomizableTextField(
-                      labelText: 'Your Jacobs Email',
+                      labelText: 'Your Constructor Email',
                       controller: email,
                       validator: (value) =>
                       (value == null || value.isEmpty)
                           ? "This field is required"
-                          : (!value.endsWith('@jacobs-university.de') &&
+                          : (!value.endsWith('@jacobs-university.de' || '@constructor.university') &&
                           value.length < 22)
-                          ? "Please enter a valid Jacobs University email address"
+                          ? "Please enter a valid Constructor University email address"
                           : null,
                     ),
                     Row(
