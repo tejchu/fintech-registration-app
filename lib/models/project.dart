@@ -1,6 +1,6 @@
 
 List<String> projects = [
-  'ibcm','other ibcm', 'northcap'
+  'Northcap','Fintech', 'Consulting', 'Events', "PR & HR"
 ];
 
 class SelectedProject{

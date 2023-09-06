@@ -31,13 +31,16 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
   TextEditingController lastName = TextEditingController();
   TextEditingController email = TextEditingController();
 
+
   //logic variables for validation
   bool? myValue = false;
   bool submittedCV = false;
+  bool submittedCL = false;
   bool submittedNDA = false;
   bool downloadedNDA = false;
   File? pickedCV;
   File? pickedNDA;
+  File? pickedCL;
 
   //select files
   void selectCV() {
@@ -51,6 +54,21 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
       setState(() {
         pickedCV = file;
         submittedCV = true;
+      });
+    });
+  }
+
+  void selectCL() {
+    FileUploadInputElement selectInput = FileUploadInputElement()
+      ..accept = 'pdf/*';
+    selectInput.click();
+    selectInput.onChange.listen((event) {
+      final file = selectInput.files!.first;
+      final reader = FileReader();
+      reader.readAsDataUrl(file);
+      setState(() {
+        pickedCL = file;
+        submittedCL = true;
       });
     });
   }
@@ -120,12 +138,54 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 20, horizontal: 20),
+                          child: MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            child: GestureDetector(
+                              onTap: selectCV,
+                              child: SizedBox(
+                                width: 150,
+                                height: 50,
+                                child: Card(
+                                  color: myButtonColor,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                      children: [
+                                        (submittedCV)
+                                            ? Checkbox(
+                                          activeColor: Colors.transparent,
+                                          value: submittedCV,
+                                          onChanged: (value) => false,
+                                        )
+                                            : const Icon(Icons.upload),
+                                        Text(
+                                          (!submittedCV)
+                                              ? 'Resume (CV)'
+                                              : 'CV uploaded',
+                                          style: TextStyle(
+                                              color: (submittedCV)
+                                                  ? Colors.white
+                                                  : Colors.black),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                         MouseRegion(
                           cursor: SystemMouseCursors.click,
                           child: GestureDetector(
-                            onTap: selectCV,
+                            onTap: selectCL,
                             child: SizedBox(
-                              width: 200,
+                              width: 150,
                               height: 50,
                               child: Card(
                                 color: myButtonColor,
@@ -135,19 +195,19 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                                     mainAxisAlignment:
                                     MainAxisAlignment.spaceAround,
                                     children: [
-                                      (submittedCV)
+                                      (submittedCL)
                                           ? Checkbox(
                                         activeColor: Colors.transparent,
-                                        value: submittedCV,
+                                        value: submittedCL,
                                         onChanged: (value) => false,
                                       )
                                           : const Icon(Icons.upload),
                                       Text(
-                                        (!submittedCV)
-                                            ? 'Upload your CV'
-                                            : 'CV uploaded',
+                                        (!submittedCL)
+                                            ? 'Cover Leter'
+                                            : 'Cover Letter uploaded',
                                         style: TextStyle(
-                                            color: (submittedCV)
+                                            color: (submittedCL)
                                                 ? Colors.white
                                                 : Colors.black),
                                       ),
@@ -158,13 +218,15 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                             ),
                           ),
                         ),
-                        (submittedCV)
+                        (submittedCV || submittedCL)
                             ? CloseButton(
                           color: Colors.black54,
                           onPressed: () =>
                               setState(() {
                                 submittedCV = false;
+                                submittedCL = false;
                                 pickedCV = null;
+                                pickedCL = null;
                               }),
                         )
                             : const SizedBox.shrink(),
@@ -198,10 +260,10 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                                 setState(() {
                                   downloadedNDA = true;
                                 });
-                                downloadFile('assets/Blank_NDA.pdf');
+                                downloadFile('https://firebasestorage.googleapis.com/v0/b/fintech-registration-app.appspot.com/o/Blank_NDA.pdf?alt=media&token=806acb1a-cb3e-4e6d-92b8-277a59d2d276');
                               },
                               child: SizedBox(
-                                width: 200,
+                                width: 150,
                                 height: 50,
                                 child: Card(
                                   color: myButtonColor,
@@ -238,7 +300,7 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                           child: GestureDetector(
                             onTap: selectNDA,
                             child: SizedBox(
-                              width: 200,
+                              width: 150,
                               height: 50,
                               child: Card(
                                 color: myButtonColor,
@@ -311,15 +373,21 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                                 submittedCV) {
                               //add major,project,gradYear to firebase
                               FirebaseService().addUser({
-                                'first_name': firstName.text, // John Doe
-                                'last_name': lastName.text, // Stokes and Sons
-                                'email': email.text, // 42
+                                'first_name': firstName.text,
+                                'last_name': lastName.text,
+                                'email': email.text,
+                                'project': project,
+                                'major': major,
+                                'graduation_year': gradYear,
                               });
                               FileUploaderService.uploadFile(
                                   'CVs/${firstName.text}${lastName.text}',
                                   pickedCV);
                               FileUploaderService.uploadFile(
                                   'NDAs/${firstName.text}${lastName.text}',
+                                  pickedNDA);
+                              FileUploaderService.uploadFile(
+                                  'CLs/${firstName.text}${lastName.text}',
                                   pickedNDA);
 
                               Navigator.of(context).push(
