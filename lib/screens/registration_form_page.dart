@@ -388,7 +388,7 @@ class _RegistrationFormPageState extends State<RegistrationFormPage> {
                                   pickedNDA);
                               FileUploaderService.uploadFile(
                                   'CLs/${firstName.text}${lastName.text}',
-                                  pickedNDA);
+                                  pickedCL);
 
                               Navigator.of(context).push(
                                 MaterialPageRoute(
